@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* CSS variables for AnimeHeardle — dark MUSIME theme */
+  --color-background-primary:   #0a0005;
+  --color-background-secondary: #1a000e;
+  --color-background-success:   rgba(34, 197, 94, 0.15);
+  --color-background-danger:    rgba(239, 68, 68, 0.15);
+  --color-background-info:      rgba(59, 130, 246, 0.15);
+  --color-background-warning:   rgba(251, 191, 36, 0.15);
+
+  --color-border-primary:   #b7002b;
+  --color-border-secondary: #3f0020;
+  --color-border-tertiary:  #2a0015;
+  --color-border-success:   rgb(34, 197, 94);
+  --color-border-danger:    rgb(239, 68, 68);
+  --color-border-info:      rgb(59, 130, 246);
+  --color-border-warning:   rgb(251, 191, 36);
+
+  --color-text-primary:   #ffffff;
+  --color-text-secondary: #9ca3af;
+  --color-text-success:   rgb(134, 239, 172);
+  --color-text-danger:    rgb(252, 165, 165);
+  --color-text-info:      rgb(147, 197, 253);
+  --color-text-warning:   rgb(253, 224, 71);
+
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-sans: system-ui, 'Segoe UI', sans-serif;
+}

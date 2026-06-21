@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\\\\musime\\\\src\\\\components\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\\\\musime\\\\src\\\\pages\")",
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\\\\musime\\\\src\\\\hooks\")",
+      "Bash(Write-Host \"Carpetas creadas\")",
+      "Read(//c/Users/torre/Desktop/Mario/musime/**)",
+      "Bash(.\\\\yt-dlp.exe -x --audio-format mp3 --audio-quality 5 -o \"musime\\\\public\\\\audio\\\\%\\(id\\)s.%\\(ext\\)s\" -a urls.txt)",
+      "PowerShell(node --version)",
+      "PowerShell(ffmpeg -version 2>$null)",
+      "PowerShell(winget --version)",
+      "PowerShell(winget install Gyan.FFmpeg --accept-package-agreements --accept-source-agreements)",
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"User\"\\); ffmpeg -version 2>&1 | Select-Object -First 1; cd \"C:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\"; .\\\\yt-dlp.exe --version)",
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"PATH\", \"User\"\\); Set-Location \"C:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\"; .\\\\yt-dlp.exe -x --audio-format mp3 --audio-quality 5 -o \"musime\\\\public\\\\audio\\\\%\\(id\\)s.%\\(ext\\)s\" --no-js-runtimes --js-runtimes node -a urls.txt 2>&1)"
+    ]
+  }
+}

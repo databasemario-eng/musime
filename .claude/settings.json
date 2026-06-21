@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"C:\\\\Users\\\\torre\\\\Desktop\\\\Mario\\\\musime\"; PowerShell -ExecutionPolicy Bypass -File \".\\\\download-alt.ps1\" 2>&1)"
+    ]
+  }
+}
