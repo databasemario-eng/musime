@@ -1,16 +1,92 @@
-import ANIME_OPENINGS from './animeOpenings'
-
-// Map the rich openings dataset to the game's card format.
-// Keeps all original fields (youtubeId, alternativeIds, previewStart…)
-// and adds the aliases the game uses: year, img, song, youtube.
-const animeCards = ANIME_OPENINGS.map(opening => ({
-  ...opening,
-  year:     new Date(opening.japanAirDate).getFullYear(),
-  img:      opening.image,
-  youtube:  opening.youtubeUrl,
-  song:     opening.titleRomaji,
-  audioSrc:   `/audio/${opening.youtubeId}.mp3`,
-  spotifySrc: null,
-}))
+const animeCards = [
+  {
+    id: 1,
+    anime: 'Neon Genesis Evangelion',
+    year: 1995,
+    song: 'A Cruel Angel\'s Thesis',
+    img: 'https://cdn.myanimelist.net/images/anime/1314/108941.jpg',
+    audioSrc: '/audio/fShlVhCfHig.mp3',
+  },
+  {
+    id: 2,
+    anime: 'Dragon Ball Z',
+    year: 1989,
+    song: 'Cha-La Head-Cha-La',
+    img: 'https://cdn.myanimelist.net/images/anime/5/19530.jpg',
+    audioSrc: '/audio/O-iYhKD0Yl4.mp3',
+  },
+  {
+    id: 3,
+    anime: 'Naruto',
+    year: 2002,
+    song: 'R★O★C★K★S',
+    img: 'https://cdn.myanimelist.net/images/anime/13/17405.jpg',
+    audioSrc: '/audio/q1aq9GEHR8Q.mp3',
+  },
+  {
+    id: 4,
+    anime: 'Hunter x Hunter (2011)',
+    year: 2011,
+    song: 'Departure!',
+    img: 'https://cdn.myanimelist.net/images/anime/1337/99013.jpg',
+    audioSrc: '/audio/WBRrIVb_TDc.mp3',
+  },
+  {
+    id: 5,
+    anime: 'Demon Slayer: Kimetsu no Yaiba',
+    year: 2019,
+    song: 'Gurenge',
+    img: 'https://cdn.myanimelist.net/images/anime/1286/99889.jpg',
+    audioSrc: '/audio/pmanD_s7G3U.mp3',
+  },
+  {
+    id: 6,
+    anime: 'Toradora!',
+    year: 2008,
+    song: 'Pre-Parade',
+    img: 'https://cdn.myanimelist.net/images/anime/13/78210.jpg',
+    audioSrc: '/audio/mIkyXqKjMRo.mp3',
+  },
+  {
+    id: 7,
+    anime: 'Ao no Exorcist',
+    year: 2011,
+    song: 'Core Pride',
+    img: 'https://cdn.myanimelist.net/images/anime/8/50976.jpg',
+    audioSrc: '/audio/rflDVDGJJFI.mp3',
+  },
+  {
+    id: 8,
+    anime: 'Saint Seiya',
+    year: 1986,
+    song: 'Pegasus Fantasy',
+    img: 'https://cdn.myanimelist.net/images/anime/1327/117986.jpg',
+    audioSrc: '/audio/160XPx5D1CM.mp3',
+  },
+  {
+    id: 9,
+    anime: 'Naruto Shippuden',
+    year: 2007,
+    song: 'Blood Circulator',
+    img: 'https://cdn.myanimelist.net/images/anime/3/50701.jpg',
+    audioSrc: '/audio/hcdDnwm4pAE.mp3',
+  },
+  {
+    id: 10,
+    anime: 'Dragon Ball Z',
+    year: 1989,
+    song: 'We Gotta Power',
+    img: 'https://cdn.myanimelist.net/images/anime/5/19530.jpg',
+    audioSrc: '/audio/-CebN43ppk8.mp3',
+  },
+  {
+    id: 11,
+    anime: 'Oshi no Ko',
+    year: 2023,
+    song: 'IDOL',
+    img: 'https://cdn.myanimelist.net/images/anime/1812/134736.jpg',
+    audioSrc: '/audio/ZRtdQ81jPUQ.mp3',
+  },
+]
 
 export default animeCards
