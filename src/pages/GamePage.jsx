@@ -92,22 +92,44 @@ export default function GamePage() {
               />
             )}
 
-            {/* Feedback */}
+            {/* Feedback overlay */}
             <AnimatePresence>
               {feedback && (
                 <motion.div
-                  key={feedback + Date.now()}
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.6, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className={`px-6 py-3 rounded-2xl font-['Bangers'] text-2xl tracking-widest border-2 ${
-                    feedback === 'correct'
-                      ? 'bg-green-500/20 text-green-400 border-green-500'
-                      : 'bg-red-500/20 text-red-400 border-red-500'
-                  }`}
+                  key={feedback}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
+                  style={{
+                    background:
+                      feedback === 'correct'
+                        ? 'rgba(34,197,94,0.18)'
+                        : feedback === 'timeout'
+                        ? 'rgba(249,115,22,0.18)'
+                        : 'rgba(239,68,68,0.18)',
+                  }}
                 >
-                  {feedback === 'correct' ? '✅ CORRECTO' : feedback === 'timeout' ? '⏰ TIEMPO' : '❌ INCORRECTO'}
+                  <motion.div
+                    initial={{ scale: 0.5, y: 10 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0.5, y: 10 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+                    className={`px-8 py-5 rounded-3xl font-['Bangers'] text-3xl tracking-widest border-2 backdrop-blur-sm ${
+                      feedback === 'correct'
+                        ? 'bg-green-900/60 text-green-300 border-green-400 shadow-lg shadow-green-500/30'
+                        : feedback === 'timeout'
+                        ? 'bg-orange-900/60 text-orange-300 border-orange-400 shadow-lg shadow-orange-500/30'
+                        : 'bg-red-900/60 text-red-300 border-red-500 shadow-lg shadow-red-500/30'
+                    }`}
+                  >
+                    {feedback === 'correct'
+                      ? '✅ ¡CORRECTO!'
+                      : feedback === 'timeout'
+                      ? '⏱ ¡TIEMPO!'
+                      : '❌ ¡INCORRECTO!'}
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -172,11 +194,25 @@ export default function GamePage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.8, y: 30 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="bg-gray-950 border-2 border-[#b7002b] rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl shadow-[#b7002b]/20"
+              className="bg-gray-950 border-2 border-[#b7002b] rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl"
+              style={{ boxShadow: '0 0 40px #b7002b40, 0 25px 50px rgba(0,0,0,0.8)' }}
             >
-              <p className="text-[#b7002b] font-['Bangers'] text-5xl tracking-widest mb-1">GAME OVER</p>
+              <p
+                className="font-['Bangers'] text-6xl tracking-widest mb-1"
+                style={{ color: '#b7002b', textShadow: '0 0 20px #b7002b80' }}
+              >
+                GAME OVER
+              </p>
               <p className="text-gray-500 font-['Nunito'] text-sm mb-3">Puntuación final</p>
-              <p className="text-[#fcbe00] font-['Bangers'] text-6xl tracking-wider mb-6">{score}</p>
+              <motion.p
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+                className="font-['Bangers'] text-7xl tracking-wider mb-6"
+                style={{ color: '#fcbe00', textShadow: '0 0 24px #fcbe0060' }}
+              >
+                {score}
+              </motion.p>
 
               {!saved ? (
                 <>
