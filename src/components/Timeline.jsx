@@ -1,15 +1,10 @@
-export default function Timeline({ timeline, insertIdx, onSlotClick, finished }) {
+export default function Timeline({ timeline, insertIdx, onSlotClick, activeCard }) {
   return (
-    <div className="w-full overflow-x-auto pb-2">
-      <div className="flex items-center min-w-max px-4 gap-1">
+    <div className="w-full overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-700">
+      <div className="flex items-end min-w-max px-4 gap-1 py-2">
         {timeline.map((card, i) => (
-          <div key={card.id} className="flex items-center gap-1">
-            <Slot
-              idx={i}
-              selected={insertIdx === i}
-              onClick={onSlotClick}
-              disabled={finished}
-            />
+          <div key={card.id} className="flex items-end gap-1">
+            <Slot idx={i} selected={insertIdx === i} onClick={onSlotClick} activeCard={activeCard} />
             <TimelineCard card={card} />
           </div>
         ))}
@@ -17,62 +12,57 @@ export default function Timeline({ timeline, insertIdx, onSlotClick, finished })
           idx={timeline.length}
           selected={insertIdx === timeline.length}
           onClick={onSlotClick}
-          disabled={finished}
+          activeCard={activeCard}
         />
       </div>
     </div>
   )
 }
 
-function Slot({ idx, selected, onClick, disabled }) {
+function Slot({ idx, selected, onClick, activeCard }) {
   return (
-    <button
-      disabled={disabled}
-      onClick={() => !disabled && onClick(idx)}
-      className={`
-        h-20 w-8 rounded-lg border-2 flex items-center justify-center transition-all shrink-0
-        ${disabled ? 'opacity-30 cursor-default border-gray-700' :
-          selected
-            ? 'border-yellow-400 bg-yellow-400/20 scale-110 shadow-lg shadow-yellow-400/30'
-            : 'border-red-800 bg-red-900/20 hover:border-red-500 hover:bg-red-900/40 cursor-pointer'
-        }
-      `}
-    >
-      <span className={`text-xl ${selected ? 'text-yellow-400' : 'text-red-700'}`}>↓</span>
-    </button>
+    <div className="relative flex flex-col items-center">
+      {selected && activeCard && (
+        <div className="absolute bottom-full mb-2 w-16 z-10">
+          <div className="rounded-lg overflow-hidden border-2 border-[#fcbe00] shadow-lg shadow-[#fcbe00]/30">
+            <img
+              src={activeCard.img}
+              alt={activeCard.anime}
+              className="w-full h-12 object-cover"
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          </div>
+          <div className="w-0 h-0 mx-auto border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#fcbe00]" />
+        </div>
+      )}
+      <button
+        onClick={() => onClick(idx)}
+        className={`h-16 w-7 rounded-lg border-2 flex items-center justify-center transition-all text-sm font-black
+          ${selected
+            ? 'border-[#fcbe00] bg-[#fcbe00]/20 scale-110 text-[#fcbe00] shadow-md shadow-[#fcbe00]/30'
+            : 'border-[#b7002b]/60 bg-[#b7002b]/10 hover:border-[#b7002b] hover:bg-[#b7002b]/20 text-[#b7002b]/60 hover:text-[#b7002b]'
+          }`}
+      >
+        +
+      </button>
+    </div>
   )
 }
 
 function TimelineCard({ card }) {
-  const failed = card.failed === true
   return (
-    <div
-      className={`flex flex-col items-center rounded-xl overflow-hidden w-24 shrink-0 transition-all
-        ${failed
-          ? 'bg-gray-900 border border-gray-600 opacity-60'
-          : 'bg-gray-800 border border-gray-500'
-        }`}
-    >
-      <div className="w-full h-14 overflow-hidden relative">
+    <div className="flex flex-col items-center rounded-xl overflow-hidden w-20 shrink-0 border border-gray-700 bg-gray-800">
+      <div className="w-full h-14 overflow-hidden bg-gray-900">
         <img
           src={card.img}
           alt={card.anime}
-          className={`w-full h-full object-cover ${failed ? 'grayscale' : ''}`}
-          onError={(e) => { e.target.style.display = 'none' }}
+          className="w-full h-full object-cover"
+          onError={e => { e.target.style.display = 'none' }}
         />
-        {failed && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <span className="text-lg">❌</span>
-          </div>
-        )}
       </div>
-      <div className="p-1 text-center">
-        <p className={`text-xs font-semibold leading-tight line-clamp-2 ${failed ? 'text-gray-400' : 'text-white'}`}>
-          {card.anime}
-        </p>
-        <p className={`text-xs font-bold mt-0.5 ${failed ? 'text-gray-500' : 'text-yellow-400'}`}>
-          {card.year}
-        </p>
+      <div className="p-1.5 text-center w-full">
+        <p className="text-white text-xs font-semibold font-['Nunito'] leading-tight line-clamp-2">{card.anime}</p>
+        <p className="text-[#fcbe00] text-xs font-black mt-0.5">{card.year}</p>
       </div>
     </div>
   )

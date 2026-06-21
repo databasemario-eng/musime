@@ -1,103 +1,94 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-const DIFFICULTIES = [
-  { label: 'Fácil', time: 20, desc: '20 segundos por carta' },
-  { label: 'Normal', time: 15, desc: '15 segundos por carta' },
-  { label: 'Difícil', time: 10, desc: '10 segundos por carta' },
-]
+import { supabase } from '../lib/supabase'
 
 export default function StartPage() {
   const navigate = useNavigate()
-  const [difficulty, setDifficulty] = useState(1)
-  const [ranking, setRanking] = useState([])
+  const [top3, setTop3] = useState([])
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('musime_ranking')
-      if (raw) setRanking(JSON.parse(raw).slice(0, 3))
-    } catch { /* empty */ }
+    supabase
+      .from('ranking')
+      .select('*')
+      .order('score', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setTop3(data || []))
   }, [])
 
-  function handlePlay() {
-    localStorage.setItem('musime_time', DIFFICULTIES[difficulty].time)
-    navigate('/game')
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#b7002b] to-black flex flex-col items-center justify-center gap-8 px-4 py-12">
-      {/* logo */}
-      <div className="text-center">
-        <img src="/logo-musime.png" alt="MUSIME" className="w-72 md:w-96 mx-auto mb-6 drop-shadow-2xl" />
-        <p className="text-gray-300 text-lg md:text-xl mt-2 font-light tracking-wide">
-          ¿Puedes ordenar los openings de anime por año?
-        </p>
+    <div
+      className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10"
+      style={{
+        backgroundImage: 'radial-gradient(circle, #2a2a2a 1px, transparent 1px)',
+        backgroundSize: '22px 22px',
+      }}
+    >
+      {/* Logo */}
+      <div className="mb-3">
+        <img
+          src="/logo-musime.png"
+          alt="MUSIME"
+          className="h-36 object-contain"
+          style={{
+            filter: 'drop-shadow(0 0 16px #b7002b) drop-shadow(0 0 40px #b7002b80)',
+          }}
+        />
       </div>
 
-      {/* difficulty */}
-      <div className="flex flex-col items-center gap-3">
-        <p className="text-gray-400 text-sm uppercase tracking-widest">Dificultad</p>
-        <div className="flex gap-3">
-          {DIFFICULTIES.map((d, i) => (
-            <button
-              key={d.label}
-              onClick={() => setDifficulty(i)}
-              className={`px-5 py-3 rounded-xl font-bold transition-all ${
-                difficulty === i
-                  ? 'bg-red-600 text-white scale-105 shadow-lg shadow-red-900'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-              }`}
-            >
-              <span className="block">{d.label}</span>
-              <span className="block text-xs font-normal opacity-70">{d.desc}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <p className="font-['Nunito'] text-gray-300 text-center text-base mb-8 max-w-xs leading-relaxed">
+        ¿Puedes ordenar los openings de anime por año?
+      </p>
 
-      {/* play button */}
-      <button
-        onClick={handlePlay}
-        className="px-16 py-5 bg-[#fcbe00] hover:brightness-110 active:scale-95 text-black text-2xl font-bold border-2 border-black rounded-2xl shadow-2xl shadow-black/50 transition-all tracking-wide"
-      >
-        ¡JUGAR!
-      </button>
-
-      {/* ranking top 3 */}
-      {ranking.length > 0 && (
-        <div className="bg-gray-900/70 border border-gray-700 rounded-2xl px-8 py-5 w-full max-w-xs backdrop-blur">
-          <h2 className="text-center text-gray-400 text-xs uppercase tracking-widest mb-3">Top 3</h2>
-          {ranking.map((entry, i) => (
-            <div key={i} className="flex justify-between items-center py-1 border-b border-gray-800 last:border-0">
-              <span className="text-yellow-400 font-bold w-6">{i + 1}.</span>
-              <span className="text-white flex-1 truncate">{entry.name}</span>
-              <span className="text-red-400 font-black">{entry.score}</span>
-            </div>
-          ))}
-          <button
-            onClick={() => navigate('/ranking')}
-            className="mt-3 w-full py-2 bg-black text-white border-2 border-white font-bold rounded-xl text-sm hover:bg-gray-900 transition-colors"
-          >
-            Ver ranking completo →
-          </button>
-        </div>
-      )}
-
-      {ranking.length === 0 && (
+      {/* Mode buttons */}
+      <div className="flex flex-col gap-4 w-full max-w-xs mb-10">
         <button
-          onClick={() => navigate('/ranking')}
-          className="px-8 py-3 bg-black text-white border-2 border-white font-bold rounded-xl hover:bg-gray-900 transition-colors"
+          onClick={() => navigate('/game/normal')}
+          className="bg-[#fcbe00] text-black rounded-2xl py-4 px-6 shadow-lg hover:scale-105 active:scale-95 transition-transform"
         >
-          Ver ranking →
+          <span className="font-['Bangers'] text-3xl tracking-widest block">MODO NORMAL</span>
+          <span className="font-['Nunito'] font-bold text-sm block mt-0.5">
+            2 vidas · 2 intentos por carta · 10 seg
+          </span>
         </button>
+
+        <button
+          onClick={() => navigate('/game/yamete')}
+          className="bg-[#b7002b] text-white rounded-2xl py-4 px-6 shadow-lg hover:scale-105 active:scale-95 transition-transform"
+        >
+          <span className="font-['Bangers'] text-3xl tracking-widest block">YAMETE KUDASAI</span>
+          <span className="font-['Nunito'] font-bold text-sm block mt-0.5 text-red-200">
+            Sin pistas. Sin piedad.
+          </span>
+        </button>
+      </div>
+
+      {/* Top 3 */}
+      {top3.length > 0 && (
+        <div className="w-full max-w-xs mb-6">
+          <h3 className="font-['Bangers'] text-[#fcbe00] text-xl tracking-widest text-center mb-3">
+            🏆 TOP 3
+          </h3>
+          <div className="flex flex-col gap-2">
+            {top3.map((entry, i) => (
+              <div
+                key={entry.id}
+                className="flex items-center gap-3 bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-2.5"
+              >
+                <span className="text-lg w-6 text-center">{['🥇', '🥈', '🥉'][i]}</span>
+                <span className="text-white font-bold font-['Nunito'] flex-1 truncate">{entry.nombre}</span>
+                <span className="text-[#fcbe00] font-black font-['Bangers'] text-lg">{entry.score}</span>
+                <span className="text-gray-600 text-xs uppercase font-['Nunito']">{entry.mode}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
-      {/* Heardle mode */}
       <button
-        onClick={() => navigate('/heardle')}
-        className="px-8 py-3 bg-gray-900 text-yellow-300 border-2 border-yellow-600 font-bold rounded-xl hover:bg-gray-800 hover:border-yellow-400 transition-colors text-sm"
+        onClick={() => navigate('/ranking')}
+        className="text-gray-500 text-sm font-['Nunito'] hover:text-white transition-colors underline underline-offset-2"
       >
-        🎵 Modo Heardle
+        VER RANKING COMPLETO
       </button>
     </div>
   )

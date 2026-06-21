@@ -1,29 +1,32 @@
-export default function Card({ card, showDetails = false }) {
+export default function Card({ card, revealed = false }) {
   if (!card) return null
+
   return (
-    <div className="relative bg-gray-900 border-2 border-red-600 rounded-2xl shadow-xl shadow-red-900/40 overflow-hidden w-52 shrink-0">
-      {showDetails && (
-        <div className="relative h-56 overflow-hidden">
-          <img
-            src={card.img}
-            alt={card.anime}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.target.style.display = 'none' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+    <div
+      className="w-40 shrink-0 rounded-2xl overflow-hidden shadow-xl"
+      style={{ border: '2px solid #b7002b', boxShadow: '0 0 20px rgba(183,0,43,0.3)' }}
+    >
+      {revealed ? (
+        <>
+          <div className="h-44 overflow-hidden bg-gray-900">
+            <img
+              src={card.img}
+              alt={card.anime}
+              className="w-full h-full object-cover"
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          </div>
+          <div className="bg-gray-900 p-3 text-center">
+            <p className="text-white text-xs font-bold font-['Nunito'] leading-tight line-clamp-2">{card.anime}</p>
+            <p className="text-[#fcbe00] font-black text-xl mt-1">{card.year}</p>
+          </div>
+        </>
+      ) : (
+        <div className="h-56 flex flex-col items-center justify-center bg-gray-900 gap-3">
+          <img src="/logo-musime.png" alt="MUSIME" className="h-16 object-contain opacity-50" />
+          <p className="text-gray-600 text-xs font-['Nunito'] tracking-widest uppercase">¿Qué anime es?</p>
         </div>
       )}
-      {!showDetails && (
-        <div className="h-32 flex items-center justify-center bg-gradient-to-br from-red-900/40 to-gray-900">
-          <span className="text-5xl">🎵</span>
-        </div>
-      )}
-      <div className="p-3 flex flex-col gap-1">
-        <p className="text-white font-bold text-sm leading-tight">{card.anime}</p>
-        {showDetails && (
-          <p className="text-red-400 text-xs italic">♪ {card.song}</p>
-        )}
-      </div>
     </div>
   )
 }

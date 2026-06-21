@@ -1,3 +1,8 @@
+// SQL para crear la tabla en Supabase:
+// CREATE TABLE ranking (id serial primary key, nombre text, score int, mode text, fecha timestamp default now());
+// ALTER TABLE ranking ENABLE ROW LEVEL SECURITY;
+// CREATE POLICY "Allow all" ON ranking FOR ALL USING (true) WITH CHECK (true);
+
 import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = 'https://eqhdtalwpcstmettwrzw.supabase.co'

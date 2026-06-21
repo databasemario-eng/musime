@@ -1,247 +1,215 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import useGameLogic from '../hooks/useGameLogic'
+import AudioPlayer from '../components/AudioPlayer'
 import Card from '../components/Card'
 import Timeline from '../components/Timeline'
 import HUD from '../components/HUD'
-import AudioPlayer from '../components/AudioPlayer'
+import { supabase } from '../lib/supabase'
 
 export default function GamePage() {
+  const { mode = 'normal' } = useParams()
   const navigate = useNavigate()
-  const savedTime = parseInt(localStorage.getItem('musime_time') || '15', 10)
-  const game = useGameLogic(savedTime)
-
   const [showAudio, setShowAudio] = useState(false)
-  const [showHint, setShowHint] = useState(false)
-  const [showDetails, setShowDetails] = useState(false)
-  const [hintUsed, setHintUsed] = useState(false)
   const [playerName, setPlayerName] = useState('')
   const [saved, setSaved] = useState(false)
-  const [feedbackAnim, setFeedbackAnim] = useState(null)
 
-  // reset UI state when card advances
+  const {
+    timeline, currentCard, score, totalFails,
+    chrono, insertIdx, feedback, gameOver, hintUsed, timeLimit,
+    handleSlotClick, handleCheck, handleHint, handleStartAudio, nextCard, handleReset,
+  } = useGameLogic(mode)
+
+  // Auto-clear feedback and advance UI after each result
   useEffect(() => {
-    setShowAudio(false)
-    setShowHint(false)
-    setShowDetails(false)
-    setHintUsed(false)
-  }, [game.currentCard?.id])
+    if (!feedback) return
+    const t = setTimeout(() => {
+      if (!gameOver) {
+        setShowAudio(false)
+        nextCard()
+      }
+    }, 1500)
+    return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feedback])
 
-  // feedback animation
-  useEffect(() => {
-    if (game.feedback) {
-      setFeedbackAnim(game.feedback)
-      const t = setTimeout(() => setFeedbackAnim(null), 900)
-      return () => clearTimeout(t)
-    }
-  }, [game.feedback, game.attempt])
-
-  function handleHint() {
-    setShowDetails(true)
-    setShowHint(true)
-    setShowAudio(true)
-    setHintUsed(true)
-  }
-
-  function handleSaveScore() {
+  async function handleSave() {
     if (!playerName.trim()) return
-    try {
-      const raw = localStorage.getItem('musime_ranking')
-      const ranking = raw ? JSON.parse(raw) : []
-      ranking.push({ name: playerName.trim(), score: game.score, date: new Date().toLocaleDateString() })
-      ranking.sort((a, b) => b.score - a.score)
-      localStorage.setItem('musime_ranking', JSON.stringify(ranking.slice(0, 20)))
-      setSaved(true)
-    } catch { /* empty */ }
+    await supabase.from('ranking').insert({ nombre: playerName.trim(), score, mode })
+    setSaved(true)
   }
 
-  if (!game.currentCard && !game.finished) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white text-2xl">
-        Cargando…
-      </div>
-    )
+  function handleRestart() {
+    handleReset()
+    setSaved(false)
+    setShowAudio(false)
+    setPlayerName('')
   }
+
+  const deckFinished = !currentCard && !gameOver
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#b7002b] to-black flex flex-col items-center gap-4 px-3 py-4 relative overflow-hidden">
-      {/* feedback flash */}
-      {feedbackAnim && (
-        <div
-          className={`fixed inset-0 pointer-events-none z-40 flex items-center justify-center
-            ${feedbackAnim === 'correct' ? 'bg-green-500/20' : 'bg-red-600/30'}`}
-          style={{ animation: 'fadeOut 0.9s ease forwards' }}
-        >
-          <span className="text-8xl drop-shadow-lg">
-            {feedbackAnim === 'correct' ? '✅' : '❌'}
-          </span>
-        </div>
-      )}
-
-      {/* HUD */}
+    <div className="min-h-screen bg-black flex flex-col">
       <HUD
-        chrono={game.chrono}
-        score={game.score}
-        currentIdx={game.currentIdx}
-        total={game.totalCards}
-        initialTime={game.initialTime}
+        score={score}
+        chrono={chrono}
+        timeLimit={timeLimit}
+        mode={mode}
+        totalFails={totalFails}
       />
 
-      {/* current card area */}
-      {!game.finished && game.currentCard && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-md">
-          <Card card={game.currentCard} showDetails={showDetails} />
+      {/* Main play area */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-5 px-4 py-6">
 
-          {/* attempt dots */}
-          <div className="flex gap-2">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className={`w-3 h-3 rounded-full ${
-                  i < game.attempt ? 'bg-red-600' : 'bg-gray-700'
-                }`}
+        {deckFinished ? (
+          <div className="text-center">
+            <p className="text-[#fcbe00] font-['Bangers'] text-5xl tracking-widest">¡COMPLETADO!</p>
+            <p className="text-white font-['Nunito'] mt-2">Puntuación: <span className="font-black text-[#fcbe00]">{score}</span></p>
+          </div>
+        ) : (
+          <>
+            {/* Current card */}
+            <Card card={currentCard} revealed={hintUsed} />
+
+            {/* Audio player */}
+            {showAudio && currentCard && (
+              <AudioPlayer
+                audioSrc={currentCard.audio}
+                onStart={handleStartAudio}
+                timeLimit={timeLimit}
+                showHint={hintUsed}
+                hintImg={currentCard?.img}
+                animeName={currentCard?.anime}
               />
-            ))}
-          </div>
-
-          {/* audio player */}
-          {showAudio && (
-            <AudioPlayer
-              audioSrc={game.currentCard.audioSrc}
-              spotifySrc={game.currentCard.spotifySrc}
-              youtubeUrl={game.currentCard.youtube}
-              showHint={showHint}
-              hintImg={game.currentCard.img}
-              onClose={() => setShowAudio(false)}
-              timeLimit={game.initialTime}
-            />
-          )}
-
-          {/* action buttons */}
-          <div className="flex flex-wrap justify-center gap-2 w-full">
-            <button
-              onClick={() => setShowAudio((v) => !v)}
-              className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-xl font-semibold text-sm transition-colors"
-            >
-              {showAudio ? '⏹ Detener' : '▶ Escuchar Opening'}
-            </button>
-
-            {!hintUsed && (
-              <button
-                onClick={handleHint}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-yellow-300 rounded-xl font-semibold text-sm transition-colors"
-              >
-                🔍 Pista <span className="text-gray-400 text-xs">(-2pts)</span>
-              </button>
-            )}
-            {hintUsed && showAudio && (
-              <button
-                onClick={() => setShowHint((v) => !v)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-yellow-300 rounded-xl font-semibold text-sm transition-colors"
-              >
-                {showHint ? '🙈 Ocultar pista' : '🔍 Ver pista'}
-              </button>
             )}
 
-            <button
-              disabled={game.insertIdx === null}
-              onClick={game.handleCheck}
-              className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${
-                game.insertIdx !== null
-                  ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-900/50'
-                  : 'bg-gray-800 text-gray-600 cursor-not-allowed'
-              }`}
-            >
-              ¡COLOCAR!
-            </button>
+            {/* Feedback */}
+            <AnimatePresence>
+              {feedback && (
+                <motion.div
+                  key={feedback + Date.now()}
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.6, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className={`px-6 py-3 rounded-2xl font-['Bangers'] text-2xl tracking-widest border-2 ${
+                    feedback === 'correct'
+                      ? 'bg-green-500/20 text-green-400 border-green-500'
+                      : 'bg-red-500/20 text-red-400 border-red-500'
+                  }`}
+                >
+                  {feedback === 'correct' ? '✅ CORRECTO' : feedback === 'timeout' ? '⏰ TIEMPO' : '❌ INCORRECTO'}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <button
-              onClick={() => navigate('/')}
-              className="px-4 py-2 bg-transparent border border-gray-700 hover:border-gray-500 text-gray-400 rounded-xl text-sm transition-colors"
-            >
-              Abandonar
-            </button>
-          </div>
+            {/* Action buttons */}
+            <div className="flex gap-3 flex-wrap justify-center">
+              {!showAudio && (
+                <button
+                  onClick={() => setShowAudio(true)}
+                  className="bg-[#fcbe00] text-black font-['Bangers'] text-xl tracking-wider px-7 py-3 rounded-xl hover:scale-105 active:scale-95 transition-transform shadow-lg"
+                >
+                  ▶ ESCUCHAR
+                </button>
+              )}
 
-          <p className="text-gray-500 text-xs text-center">
-            Selecciona una ranura en la línea temporal y pulsa ¡COLOCAR!
-          </p>
-        </div>
-      )}
+              {mode === 'normal' && !hintUsed && (
+                <button
+                  onClick={handleHint}
+                  className="bg-gray-800 border border-gray-600 text-gray-300 font-['Nunito'] font-bold text-sm px-5 py-3 rounded-xl hover:scale-105 active:scale-95 transition-transform"
+                >
+                  💡 PISTA (-1pt)
+                </button>
+              )}
 
-      {/* timeline */}
-      <div className="w-full max-w-5xl">
-        <p className="text-center text-gray-500 text-xs uppercase tracking-widest mb-2">Línea temporal</p>
+              <button
+                onClick={handleCheck}
+                disabled={insertIdx === null}
+                className={`font-['Bangers'] text-xl tracking-wider px-7 py-3 rounded-xl transition-all ${
+                  insertIdx === null
+                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                    : 'bg-[#b7002b] text-white hover:scale-105 active:scale-95 shadow-lg shadow-[#b7002b]/30'
+                }`}
+              >
+                ✓ COLOCAR
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Timeline */}
+      <div className="border-t border-gray-800 bg-gray-950 py-3">
         <Timeline
-          timeline={game.timeline}
-          insertIdx={game.insertIdx}
-          onSlotClick={game.handleSlotClick}
-          finished={game.finished}
+          timeline={timeline}
+          insertIdx={insertIdx}
+          onSlotClick={handleSlotClick}
+          activeCard={currentCard}
         />
       </div>
 
-      {/* finished modal */}
-      {game.finished && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center px-4">
-          <div className="bg-gray-900 border border-red-700 rounded-3xl p-8 w-full max-w-sm text-center flex flex-col gap-5 shadow-2xl shadow-red-900">
-            <h2 className="text-4xl font-black text-white">¡Fin!</h2>
-            <div className="text-6xl font-black text-red-400">{game.score}</div>
-            <p className="text-gray-400">puntos</p>
+      {/* Game Over Modal */}
+      <AnimatePresence>
+        {gameOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 30 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="bg-gray-950 border-2 border-[#b7002b] rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl shadow-[#b7002b]/20"
+            >
+              <p className="text-[#b7002b] font-['Bangers'] text-5xl tracking-widest mb-1">GAME OVER</p>
+              <p className="text-gray-500 font-['Nunito'] text-sm mb-3">Puntuación final</p>
+              <p className="text-[#fcbe00] font-['Bangers'] text-6xl tracking-wider mb-6">{score}</p>
 
-            {!saved ? (
-              <div className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  placeholder="Tu nombre"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  maxLength={20}
-                  className="bg-gray-800 border border-gray-600 rounded-xl px-4 py-2 text-white text-center focus:outline-none focus:border-red-500"
-                />
+              {!saved ? (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Tu nombre"
+                    value={playerName}
+                    onChange={e => setPlayerName(e.target.value)}
+                    maxLength={20}
+                    className="w-full bg-gray-900 text-white rounded-xl px-4 py-3 mb-3 outline-none border border-gray-700 focus:border-[#fcbe00] font-['Nunito'] transition-colors"
+                  />
+                  <button
+                    onClick={handleSave}
+                    disabled={!playerName.trim()}
+                    className="w-full bg-[#fcbe00] text-black font-['Bangers'] text-xl tracking-wider py-3 rounded-xl mb-3 disabled:opacity-30 hover:scale-105 active:scale-95 transition-transform"
+                  >
+                    GUARDAR EN RANKING
+                  </button>
+                </>
+              ) : (
+                <p className="text-green-400 font-['Nunito'] font-bold mb-4">✅ ¡Guardado en el ranking!</p>
+              )}
+
+              <div className="flex gap-2">
                 <button
-                  onClick={handleSaveScore}
-                  disabled={!playerName.trim()}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-colors"
+                  onClick={handleRestart}
+                  className="flex-1 bg-gray-800 text-white font-['Bangers'] tracking-wider text-lg py-3 rounded-xl hover:bg-gray-700 transition-colors"
                 >
-                  Guardar puntuación
+                  JUGAR DE NUEVO
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="flex-1 bg-gray-900 text-gray-300 font-['Bangers'] tracking-wider text-lg py-3 rounded-xl hover:bg-gray-800 transition-colors border border-gray-800"
+                >
+                  INICIO
                 </button>
               </div>
-            ) : (
-              <p className="text-green-400 font-semibold">¡Puntuación guardada!</p>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => { game.handleReset(); setShowAudio(false); setSaved(false); setPlayerName('') }}
-                className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-colors"
-              >
-                Jugar de nuevo
-              </button>
-              <button
-                onClick={() => navigate('/ranking')}
-                className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-colors"
-              >
-                Ver ranking
-              </button>
-            </div>
-
-            <button
-              onClick={() => navigate('/')}
-              className="text-sm text-gray-600 hover:text-gray-400 transition-colors"
-            >
-              Volver al inicio
-            </button>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes fadeOut {
-          0% { opacity: 1; }
-          70% { opacity: 0.6; }
-          100% { opacity: 0; }
-        }
-      `}</style>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
