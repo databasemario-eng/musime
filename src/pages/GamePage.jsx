@@ -51,6 +51,14 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
+      <div className="bg-gray-950 border-b border-gray-800 px-4 py-1 flex items-center">
+        <button
+          onClick={() => navigate('/')}
+          className="text-white text-sm font-['Nunito'] opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1"
+        >
+          ← INICIO
+        </button>
+      </div>
       <HUD
         score={score}
         chrono={chrono}

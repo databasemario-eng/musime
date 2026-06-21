@@ -28,10 +28,7 @@ export default function StartPage() {
         <img
           src="/logo-musime.png"
           alt="MUSIME"
-          className="h-36 object-contain"
-          style={{
-            filter: 'drop-shadow(0 0 16px #b7002b) drop-shadow(0 0 40px #b7002b80)',
-          }}
+          className="w-80 md:w-[420px] mx-auto drop-shadow-[0_0_30px_#b7002b]"
         />
       </div>
 
