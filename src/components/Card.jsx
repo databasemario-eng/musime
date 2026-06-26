@@ -1,4 +1,4 @@
-export default function Card({ card, revealed = false }) {
+export default function Card({ card, revealed = false, showHint = false }) {
   if (!card) return null
 
   return (
@@ -6,7 +6,21 @@ export default function Card({ card, revealed = false }) {
       className="w-40 shrink-0 rounded-2xl overflow-hidden shadow-xl"
       style={{ border: '2px solid #b7002b', boxShadow: '0 0 20px rgba(183,0,43,0.3)' }}
     >
-      {revealed ? (
+      {showHint && !revealed ? (
+        <>
+          <div className="h-44 overflow-hidden bg-gray-900">
+            <img
+              src={card.img}
+              alt={card.anime}
+              className="w-full h-full object-cover"
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          </div>
+          <div className="bg-gray-900 p-3 text-center">
+            <p className="text-white text-xs font-bold font-['Nunito'] leading-tight line-clamp-2">{card.anime}</p>
+          </div>
+        </>
+      ) : revealed ? (
         <>
           <div className="h-44 overflow-hidden bg-gray-900">
             <img

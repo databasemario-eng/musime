@@ -78,7 +78,7 @@ export default function GamePage() {
         ) : (
           <>
             {/* Current card */}
-            <Card card={currentCard} revealed={hintUsed} />
+            <Card card={currentCard} showHint={hintUsed} />
 
             {/* Audio player */}
             {showAudio && currentCard && (
