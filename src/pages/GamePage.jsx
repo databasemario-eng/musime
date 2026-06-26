@@ -12,6 +12,7 @@ export default function GamePage() {
   const { mode = 'normal' } = useParams()
   const navigate = useNavigate()
   const [showAudio, setShowAudio] = useState(false)
+  const [activeAudio, setActiveAudio] = useState(null)
   const [playerName, setPlayerName] = useState('')
   const [saved, setSaved] = useState(false)
 
@@ -27,9 +28,10 @@ export default function GamePage() {
     const t = setTimeout(() => {
       if (!gameOver) {
         setShowAudio(false)
+        setActiveAudio(null)
         nextCard()
       }
-    }, 1500)
+    }, 800)
     return () => clearTimeout(t)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feedback])
@@ -44,6 +46,7 @@ export default function GamePage() {
     handleReset()
     setSaved(false)
     setShowAudio(false)
+    setActiveAudio(null)
     setPlayerName('')
   }
 
@@ -83,7 +86,7 @@ export default function GamePage() {
             {/* Audio player */}
             {showAudio && currentCard && (
               <AudioPlayer
-                audioSrc={currentCard.audio}
+                audioSrc={activeAudio}
                 onStart={handleStartAudio}
                 timeLimit={timeLimit}
                 showHint={hintUsed}
@@ -139,7 +142,10 @@ export default function GamePage() {
             <div className="flex gap-3 flex-wrap justify-center">
               {!showAudio && (
                 <button
-                  onClick={() => setShowAudio(true)}
+                  onClick={() => {
+                    setActiveAudio(currentCard.audio)
+                    setShowAudio(true)
+                  }}
                   className="bg-[#fcbe00] text-black font-['Bangers'] text-xl tracking-wider px-7 py-3 rounded-xl hover:scale-105 active:scale-95 transition-transform shadow-lg"
                 >
                   ▶ ESCUCHAR
