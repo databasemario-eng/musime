@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 
-export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hintImg, animeName }) {
+export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hintImg, animeName, mode }) {
   const audioRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState(false)
@@ -29,6 +29,13 @@ export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hi
     }
   }, [audioSrc])
 
+  function handleLoadedMetadata() {
+    const audio = audioRef.current
+    if (!audio || mode !== 'yamete') return
+    const maxStart = Math.max(0, audio.duration - 15)
+    audio.currentTime = Math.random() * maxStart
+  }
+
   if (error) {
     return (
       <div className="w-full max-w-xs p-4 bg-gray-900 rounded-xl text-center text-gray-500 text-sm border border-gray-800">
@@ -39,7 +46,7 @@ export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hi
 
   return (
     <div className="w-full max-w-xs rounded-2xl overflow-hidden bg-gray-900 border border-gray-700 shadow-lg">
-      <audio ref={audioRef} src={audioSrc} />
+      <audio ref={audioRef} src={audioSrc} onLoadedMetadata={handleLoadedMetadata} />
 
       <div className="relative h-32 flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900">
         {showHint ? (

@@ -89,6 +89,7 @@ export default function GamePage() {
                 showHint={hintUsed}
                 hintImg={currentCard?.img}
                 animeName={currentCard?.anime}
+                mode={mode}
               />
             )}
 
