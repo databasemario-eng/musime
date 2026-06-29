@@ -24,7 +24,7 @@ export const PACKS = {
     color: '#e07b00',
     emoji: '🏴‍☠️',
     cards: packOnePiece,
-    free: false, // → true para desbloquear sin pago
+    free: true,
   },
   shonen: {
     id: 'shonen',
@@ -33,7 +33,7 @@ export const PACKS = {
     color: '#b7002b',
     emoji: '⚡',
     cards: packShonen,
-    free: false,
+    free: true,
   },
   clasicos: {
     id: 'clasicos',
@@ -42,7 +42,7 @@ export const PACKS = {
     color: '#5b8cff',
     emoji: '📺',
     cards: packClasicos,
-    free: false,
+    free: true,
   },
 }
 
