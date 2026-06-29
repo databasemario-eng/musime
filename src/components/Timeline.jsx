@@ -14,7 +14,7 @@ export default function Timeline({ timeline, insertIdx, onSlotClick, activeCard 
               transition={{ type: 'spring', stiffness: 380, damping: 22 }}
               className="flex items-end gap-1.5 snap-center"
             >
-              <Slot idx={i} selected={insertIdx === i} onClick={onSlotClick} activeCard={activeCard} />
+              <Slot idx={i} selected={insertIdx === i} onClick={onSlotClick} />
               <TimelineCard card={card} />
             </motion.div>
           ))}
@@ -24,7 +24,6 @@ export default function Timeline({ timeline, insertIdx, onSlotClick, activeCard 
             idx={timeline.length}
             selected={insertIdx === timeline.length}
             onClick={onSlotClick}
-            activeCard={activeCard}
           />
         </div>
       </div>
@@ -32,31 +31,9 @@ export default function Timeline({ timeline, insertIdx, onSlotClick, activeCard 
   )
 }
 
-function Slot({ idx, selected, onClick, activeCard }) {
+function Slot({ idx, selected, onClick }) {
   return (
     <div className="relative flex flex-col items-center">
-      {/* Preview de la carta activa encima del slot seleccionado */}
-      <AnimatePresence>
-        {selected && activeCard && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            className="absolute bottom-full mb-2 w-16 z-10"
-          >
-            <div className="rounded-lg overflow-hidden border-2 border-[#fcbe00] shadow-lg shadow-[#fcbe00]/40">
-              <img
-                src={activeCard.img}
-                alt={activeCard.anime}
-                className="w-full h-12 object-cover"
-                onError={e => { e.target.style.display = 'none' }}
-              />
-            </div>
-            <div className="w-0 h-0 mx-auto border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-[#fcbe00]" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <button
         onClick={() => onClick(idx)}
         className={`h-20 w-9 rounded-xl border-2 flex items-center justify-center transition-all duration-150 text-base font-black select-none
