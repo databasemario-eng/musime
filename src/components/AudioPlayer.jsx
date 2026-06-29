@@ -4,7 +4,58 @@ export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hi
   const audioRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState(false)
+  const silenceOffsetRef = useRef(0)
+  const metadataReadyRef = useRef(false)
 
+  // Offline silence analysis: find first non-silent sample and store the timestamp.
+  // Runs in parallel with the audio element's own network fetch (browser caches the URL).
+  // Skipped for 'yamete' mode which uses a random start instead.
+  useEffect(() => {
+    silenceOffsetRef.current = 0
+    metadataReadyRef.current = false
+    if (!audioSrc || mode === 'yamete') return
+
+    let cancelled = false
+
+    async function findSilenceEnd() {
+      try {
+        const res = await fetch(audioSrc)
+        const buf = await res.arrayBuffer()
+        if (cancelled) return
+
+        const ctx = new AudioContext()
+        const decoded = await ctx.decodeAudioData(buf)
+        ctx.close()
+        if (cancelled) return
+
+        const data = decoded.getChannelData(0)
+        const sr = decoded.sampleRate
+        const threshold = 0.005
+
+        for (let i = 0; i < data.length; i++) {
+          if (Math.abs(data[i]) > threshold) {
+            // Go 50ms before first sound so the attack isn't clipped
+            const offset = Math.max(0, i / sr - 0.05)
+            silenceOffsetRef.current = offset
+
+            // If metadata already fired, apply immediately
+            const audio = audioRef.current
+            if (audio && metadataReadyRef.current && audio.currentTime < offset) {
+              audio.currentTime = offset
+            }
+            return
+          }
+        }
+      } catch {
+        // silent fail — audio still plays from the start
+      }
+    }
+
+    findSilenceEnd()
+    return () => { cancelled = true }
+  }, [audioSrc, mode])
+
+  // Playback effect
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -30,10 +81,21 @@ export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hi
   }, [audioSrc])
 
   function handleLoadedMetadata() {
+    metadataReadyRef.current = true
     const audio = audioRef.current
-    if (!audio || mode !== 'yamete') return
-    const maxStart = Math.max(0, audio.duration - 15)
-    audio.currentTime = Math.random() * maxStart
+    if (!audio) return
+
+    if (mode === 'yamete') {
+      const maxStart = Math.max(0, audio.duration - 15)
+      audio.currentTime = Math.random() * maxStart
+      return
+    }
+
+    // Apply silence offset if analysis already finished
+    const offset = silenceOffsetRef.current
+    if (offset > 0) {
+      audio.currentTime = offset
+    }
   }
 
   if (error) {

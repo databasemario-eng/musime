@@ -15,6 +15,8 @@ export default function GamePage() {
   const [activeAudio, setActiveAudio] = useState(null)
   const [playerName, setPlayerName] = useState('')
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
 
   const {
     timeline, currentCard, score, totalFails,
@@ -37,14 +39,23 @@ export default function GamePage() {
   }, [feedback])
 
   async function handleSave() {
-    if (!playerName.trim()) return
-    await supabase.from('ranking').insert({ nombre: playerName.trim(), score, mode })
-    setSaved(true)
+    if (!playerName.trim() || saving) return
+    setSaving(true)
+    setSaveError(false)
+    const { error } = await supabase.from('ranking').insert({ nombre: playerName.trim(), score, mode })
+    if (error) {
+      setSaveError(true)
+      setSaving(false)
+    } else {
+      setSaved(true)
+    }
   }
 
   function handleRestart() {
     handleReset()
     setSaved(false)
+    setSaving(false)
+    setSaveError(false)
     setShowAudio(false)
     setActiveAudio(null)
     setPlayerName('')
@@ -233,11 +244,16 @@ export default function GamePage() {
                   />
                   <button
                     onClick={handleSave}
-                    disabled={!playerName.trim()}
+                    disabled={!playerName.trim() || saving}
                     className="w-full bg-[#fcbe00] text-black font-['Bangers'] text-xl tracking-wider py-3 rounded-xl mb-3 disabled:opacity-30 hover:scale-105 active:scale-95 transition-transform"
                   >
-                    GUARDAR EN RANKING
+                    {saving ? 'GUARDANDO...' : 'GUARDAR EN RANKING'}
                   </button>
+                  {saveError && (
+                    <p className="text-red-400 font-['Nunito'] text-sm mb-3">
+                      ❌ Error al guardar. Inténtalo de nuevo.
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="text-green-400 font-['Nunito'] font-bold mb-4">✅ ¡Guardado en el ranking!</p>
