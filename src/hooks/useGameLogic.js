@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import animeCards from '../data/animeCards'
+import { buildCardSet } from '../data/packs'
 
 function shuffle(arr) {
   const a = [...arr]
@@ -14,14 +14,16 @@ function sortByYear(arr) {
   return [...arr].sort((a, b) => a.year - b.year || a.id - b.id)
 }
 
-export default function useGameLogic(mode = 'normal') {
+// packIds: array of pack ids to play with, e.g. ['base'] or ['base','onepiece']
+export default function useGameLogic(mode = 'normal', packIds = ['base']) {
   const timeLimit = mode === 'yamete' ? 15 : 10
   const maxAttempts = mode === 'yamete' ? 1 : 2
 
   const deckRef = useRef([])
 
   const buildInitialState = useCallback(() => {
-    const shuffled = shuffle(animeCards)
+    const allCards = buildCardSet(packIds)
+    const shuffled = shuffle(allCards)
     const first = shuffled[0]
     let second = shuffled[1]
     let i = 2
@@ -43,7 +45,8 @@ export default function useGameLogic(mode = 'normal') {
       gameOver: false,
       hintUsed: false,
     }
-  }, [timeLimit])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLimit, packIds.join(',')])
 
   const [state, setState] = useState(buildInitialState)
 
@@ -133,7 +136,6 @@ export default function useGameLogic(mode = 'normal') {
       return
     }
 
-    // Wrong answer
     if (mode === 'yamete') {
       setState(prev => ({ ...prev, feedback: 'wrong', timerActive: false, gameOver: true }))
       return
@@ -207,6 +209,7 @@ export default function useGameLogic(mode = 'normal') {
     gameOver: state.gameOver,
     hintUsed: state.hintUsed,
     timeLimit,
+    totalCards: deckRef.current.length + state.timeline.length,
     handleSlotClick,
     handleCheck,
     handleHint,

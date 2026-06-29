@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import StartPage from './pages/StartPage'
 import GamePage from './pages/GamePage'
 import RankingPage from './pages/RankingPage'
+import StorePage from './pages/StorePage'
 import NotFound from './pages/NotFound'
 import IntroScreen from './components/IntroScreen'
 
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/" element={<StartPage />} />
           <Route path="/game/:mode" element={<GamePage />} />
           <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/store" element={<StorePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import useGameLogic from '../hooks/useGameLogic'
 import AudioPlayer from '../components/AudioPlayer'
@@ -7,10 +7,25 @@ import Card from '../components/Card'
 import Timeline from '../components/Timeline'
 import HUD from '../components/HUD'
 import { supabase } from '../lib/supabase'
+import { sanitizeName, isValidScore, isValidMode, checkRateLimit } from '../utils/security'
+import { PACKS } from '../data/packs'
+
+const VALID_PACK_IDS = Object.keys(PACKS)
+
+function parsePacks(searchParams) {
+  const raw = searchParams.get('packs') ?? 'base'
+  const ids = raw.split(',').filter(id => VALID_PACK_IDS.includes(id))
+  return ids.length > 0 ? ids : ['base']
+}
 
 export default function GamePage() {
   const { mode = 'normal' } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+
+  const safeMode = isValidMode(mode) ? mode : 'normal'
+  const packIds = parsePacks(searchParams)
+
   const [showAudio, setShowAudio] = useState(false)
   const [activeAudio, setActiveAudio] = useState(null)
   const [playerName, setPlayerName] = useState('')
@@ -22,9 +37,8 @@ export default function GamePage() {
     timeline, currentCard, score, totalFails,
     chrono, insertIdx, feedback, gameOver, hintUsed, timeLimit,
     handleSlotClick, handleCheck, handleHint, handleStartAudio, nextCard, handleReset,
-  } = useGameLogic(mode)
+  } = useGameLogic(safeMode, packIds)
 
-  // Auto-clear feedback and advance UI after each result
   useEffect(() => {
     if (!feedback) return
     const t = setTimeout(() => {
@@ -40,9 +54,19 @@ export default function GamePage() {
 
   async function handleSave() {
     if (!playerName.trim() || saving) return
+
+    const cleanName = sanitizeName(playerName)
+    if (!cleanName) return
+    if (!isValidScore(score)) return
+    if (!checkRateLimit('ranking_save', 8000)) return
+
     setSaving(true)
     setSaveError(false)
-    const { error } = await supabase.from('ranking').insert({ nombre: playerName.trim(), score, mode })
+    const { error } = await supabase.from('ranking').insert({
+      nombre: cleanName,
+      score,
+      mode: safeMode,
+    })
     if (error) {
       setSaveError(true)
       setSaving(false)
@@ -77,11 +101,10 @@ export default function GamePage() {
         score={score}
         chrono={chrono}
         timeLimit={timeLimit}
-        mode={mode}
+        mode={safeMode}
         totalFails={totalFails}
       />
 
-      {/* Main play area */}
       <div className="flex-1 flex flex-col items-center justify-center gap-5 px-4 py-6">
 
         {deckFinished ? (
@@ -91,10 +114,8 @@ export default function GamePage() {
           </div>
         ) : (
           <>
-            {/* Current card */}
             <Card card={currentCard} showHint={hintUsed} />
 
-            {/* Audio player */}
             {showAudio && currentCard && (
               <AudioPlayer
                 audioSrc={activeAudio}
@@ -103,11 +124,10 @@ export default function GamePage() {
                 showHint={hintUsed}
                 hintImg={currentCard?.img}
                 animeName={currentCard?.anime}
-                mode={mode}
+                mode={safeMode}
               />
             )}
 
-            {/* Feedback overlay */}
             <AnimatePresence>
               {feedback && (
                 <motion.div
@@ -149,7 +169,6 @@ export default function GamePage() {
               )}
             </AnimatePresence>
 
-            {/* Action buttons */}
             <div className="flex gap-3 flex-wrap justify-center">
               {!showAudio && (
                 <button
@@ -163,7 +182,7 @@ export default function GamePage() {
                 </button>
               )}
 
-              {mode === 'normal' && !hintUsed && (
+              {safeMode === 'normal' && !hintUsed && (
                 <button
                   onClick={handleHint}
                   className="bg-gray-800 border border-gray-600 text-gray-300 font-['Nunito'] font-bold text-sm px-5 py-3 rounded-xl hover:scale-105 active:scale-95 transition-transform"
@@ -188,7 +207,6 @@ export default function GamePage() {
         )}
       </div>
 
-      {/* Timeline */}
       <div className="border-t border-gray-800 bg-gray-950 py-3">
         <Timeline
           timeline={timeline}
@@ -238,7 +256,7 @@ export default function GamePage() {
                     type="text"
                     placeholder="Tu nombre"
                     value={playerName}
-                    onChange={e => setPlayerName(e.target.value)}
+                    onChange={e => setPlayerName(e.target.value.slice(0, 20))}
                     maxLength={20}
                     className="w-full bg-gray-900 text-white rounded-xl px-4 py-3 mb-3 outline-none border border-gray-700 focus:border-[#fcbe00] font-['Nunito'] transition-colors"
                   />
