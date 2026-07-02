@@ -22,7 +22,7 @@ const packOnePiece = [
   { id: 117, anime: "One Piece",  song: "Over The Top",      year: 2019, img: "/images/117.jpg", audio: "/audio/117.mp3" },
   { id: 118, anime: "One Piece",  song: "DREAMIN' ON",       year: 2020, img: "/images/118.jpg", audio: "/audio/118.mp3" },
   { id: 119, anime: "One Piece",  song: "Paint",             year: 2021, img: "/images/119.jpg", audio: "/audio/119.mp3" },
-  { id: 120, anime: "One Piece",  song: "MILLION WISHES",    year: 2023, img: "/images/120.jpg", audio: "/audio/120.mp3" },
+  { id: 120, anime: "One Piece",  song: "The peak",          year: 2023, img: "/images/120.jpg", audio: "/audio/120.mp3" },
 ]
 
 export default packOnePiece
