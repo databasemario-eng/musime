@@ -8,17 +8,21 @@ const DLC_PACKS = Object.values(PACKS).filter(p => p.id !== 'base')
 
 export default function StartPage() {
   const navigate = useNavigate()
-  const [top3, setTop3] = useState([])
+  const [topNormal, setTopNormal] = useState([])
+  const [topYamete, setTopYamete] = useState([])
   const [selectedPacks, setSelectedPacks] = useState(['base'])
   const [showPackMenu, setShowPackMenu] = useState(false)
 
   useEffect(() => {
-    supabase
-      .from('ranking')
-      .select('*')
-      .order('score', { ascending: false })
-      .limit(3)
-      .then(({ data }) => setTop3(data || []))
+    async function fetchTops() {
+      const [{ data: normal }, { data: yamete }] = await Promise.all([
+        supabase.from('ranking').select('*').eq('mode', 'normal').order('score', { ascending: false }).limit(3),
+        supabase.from('ranking').select('*').eq('mode', 'yamete').order('score', { ascending: false }).limit(3),
+      ])
+      setTopNormal(normal || [])
+      setTopYamete(yamete || [])
+    }
+    fetchTops()
   }, [])
 
   function togglePack(packId) {
@@ -91,6 +95,9 @@ export default function StartPage() {
 
       {/* Pack selector */}
       <div className="w-full max-w-xs mb-5">
+        <p className="font-['Bangers'] text-gray-400 text-sm tracking-widest text-center mb-2 uppercase">
+          Selecciona la expansión
+        </p>
         <button
           onClick={() => setShowPackMenu(v => !v)}
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-500 transition-colors"
@@ -145,6 +152,9 @@ export default function StartPage() {
 
       {/* Mode buttons */}
       <div className="flex flex-col gap-4 w-full max-w-xs mb-10">
+        <p className="font-['Bangers'] text-gray-400 text-sm tracking-widest text-center uppercase">
+          Selecciona el modo de juego
+        </p>
         <motion.button
           onClick={() => startGame('normal')}
           whileHover={{ scale: 1.05 }}
@@ -170,28 +180,11 @@ export default function StartPage() {
         </motion.button>
       </div>
 
-      {/* Top 3 */}
-      {top3.length > 0 && (
-        <div className="w-full max-w-xs mb-6">
-          <h3 className="font-['Bangers'] text-[#fcbe00] text-2xl tracking-widest text-center mb-3">
-            🏆 TOP 3
-          </h3>
-          <div className="flex flex-col gap-2">
-            {top3.map((entry, i) => (
-              <motion.div
-                key={entry.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-3 bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3"
-              >
-                <span className="text-xl w-6 text-center">{['🥇', '🥈', '🥉'][i]}</span>
-                <span className="text-white font-bold font-['Nunito'] flex-1 truncate">{entry.nombre}</span>
-                <span className="text-[#fcbe00] font-black font-['Bangers'] text-xl">{entry.score}</span>
-                <span className="text-gray-600 text-xs uppercase font-['Nunito']">{entry.mode}</span>
-              </motion.div>
-            ))}
-          </div>
+      {/* Top 3 por modo */}
+      {(topNormal.length > 0 || topYamete.length > 0) && (
+        <div className="w-full max-w-xs mb-6 flex flex-col gap-4">
+          <MiniRanking title="NORMAL" entries={topNormal} color="#fcbe00" />
+          <MiniRanking title="YAMETE" entries={topYamete} color="#b7002b" />
         </div>
       )}
 
@@ -209,6 +202,33 @@ export default function StartPage() {
         >
           TIENDA
         </button>
+      </div>
+    </div>
+  )
+}
+
+function MiniRanking({ title, entries, color }) {
+  if (entries.length === 0) return null
+  const medals = ['🥇', '🥈', '🥉']
+  return (
+    <div>
+      <h3 className="font-['Bangers'] text-lg tracking-widest text-center mb-2" style={{ color }}>
+        🏆 TOP 3 {title}
+      </h3>
+      <div className="flex flex-col gap-1.5">
+        {entries.map((entry, i) => (
+          <motion.div
+            key={entry.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.07 }}
+            className="flex items-center gap-3 bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-2"
+          >
+            <span className="text-lg w-6 text-center">{medals[i]}</span>
+            <span className="text-white font-bold font-['Nunito'] flex-1 truncate text-sm">{entry.nombre}</span>
+            <span className="font-black font-['Bangers'] text-lg" style={{ color }}>{entry.score}</span>
+          </motion.div>
+        ))}
       </div>
     </div>
   )
