@@ -18,11 +18,11 @@ export default function IntroScreen({ onComplete }) {
 
     video.addEventListener('ended', finish, { once: true })
 
-    // Intentar autoplay con sonido; si el navegador lo bloquea, reproducir sin sonido
-    video.play().catch(() => {
-      video.muted = true
-      video.play().catch(() => {})
-    })
+    // Autoplay silencioso: es lo unico que garantiza reproduccion automatica
+    // sin gesto del usuario en todos los navegadores (incluido iOS Safari).
+    video.muted = true
+    const playPromise = video.play()
+    if (playPromise && playPromise.catch) playPromise.catch(() => {})
 
     return () => video.removeEventListener('ended', finish)
   }, [])
@@ -37,7 +37,10 @@ export default function IntroScreen({ onComplete }) {
         ref={videoRef}
         src="/intro.mp4"
         className="w-full h-full object-cover"
+        autoPlay
+        muted
         playsInline
+        preload="auto"
       />
     </div>
   )
