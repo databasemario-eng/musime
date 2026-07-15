@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import StartPage from './pages/StartPage'
 import GamePage from './pages/GamePage'
 import RankingPage from './pages/RankingPage'
@@ -9,8 +9,7 @@ import IntroScreen from './components/IntroScreen'
 
 const INTRO_KEY = 'musime_intro_seen'
 
-function AppContent() {
-  const navigate = useNavigate()
+export default function App() {
   const [showIntro, setShowIntro] = useState(
     () => !sessionStorage.getItem(INTRO_KEY)
   )
@@ -18,7 +17,6 @@ function AppContent() {
   function handleIntroComplete() {
     sessionStorage.setItem(INTRO_KEY, '1')
     setShowIntro(false)
-    navigate('/game/normal?packs=base')
   }
 
   if (showIntro) {
@@ -26,22 +24,16 @@ function AppContent() {
   }
 
   return (
-    <div className="bg-black min-h-screen">
-      <Routes>
-        <Route path="/" element={<StartPage />} />
-        <Route path="/game/:mode" element={<GamePage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/store" element={<StorePage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
-  )
-}
-
-export default function App() {
-  return (
     <BrowserRouter>
-      <AppContent />
+      <div className="bg-black min-h-screen">
+        <Routes>
+          <Route path="/" element={<StartPage />} />
+          <Route path="/game/:mode" element={<GamePage />} />
+          <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/store" element={<StorePage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
     </BrowserRouter>
   )
 }
