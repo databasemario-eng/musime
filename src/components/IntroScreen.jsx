@@ -29,14 +29,14 @@ export default function IntroScreen({ onComplete }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black cursor-pointer"
+      className="fixed inset-0 z-50 bg-black cursor-pointer flex items-center justify-center px-4"
       style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.6s ease-in-out' }}
       onClick={finish}
     >
       <video
         ref={videoRef}
         src="/intro.mp4"
-        className="w-full h-full object-cover"
+        className="w-full max-w-[420px] h-auto object-contain rounded-2xl shadow-2xl"
         autoPlay
         muted
         playsInline
