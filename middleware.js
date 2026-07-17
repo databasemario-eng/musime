@@ -1,12 +1,17 @@
 import { next } from '@vercel/functions'
 
-// Puerta de acceso para la beta de MUSIME.
-// Un solo codigo de invitacion compartido con los testers.
+// Puerta de acceso temporal para la beta de MUSIME.
 // El codigo real vive en la variable de entorno BETA_ACCESS_CODE (Vercel > Settings > Environment Variables),
 // nunca en el codigo fuente.
+//
+// La beta se cierra automaticamente a partir de BETA_EXPIRES_AT, incluso para quien
+// ya tenga el codigo o la cookie guardada. Para alargar o acortar la prueba, cambia
+// esta fecha.
 
 const COOKIE_NAME = 'musime_beta'
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 90 // 90 dias
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 15 // 15 dias
+
+const BETA_EXPIRES_AT = new Date('2026-08-01T00:00:00Z').getTime()
 
 export default function middleware(request) {
   const url = new URL(request.url)
@@ -16,6 +21,13 @@ export default function middleware(request) {
   // inaccesible por error de configuracion).
   if (!validCode) {
     return next()
+  }
+
+  if (Date.now() > BETA_EXPIRES_AT) {
+    return new Response(expiredHtml(), {
+      status: 403,
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+    })
   }
 
   const cookieHeader = request.headers.get('cookie') || ''
@@ -43,13 +55,13 @@ export default function middleware(request) {
   })
 }
 
-function gateHtml() {
+function pageShell(title, body) {
   return `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MUSIME - Acceso anticipado</title>
+<title>${title}</title>
 <style>
   body { background:#000; color:#fff; font-family: -apple-system, sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; padding:0 16px; }
   .box { text-align:center; max-width:340px; width:100%; }
@@ -64,22 +76,36 @@ function gateHtml() {
 <body>
   <div class="box">
     <h1>MUSIME</h1>
-    <p>Acceso anticipado a la beta.<br/>Introduce tu codigo de invitacion.</p>
+    ${body}
+  </div>
+</body>
+</html>`
+}
+
+function gateHtml() {
+  return pageShell(
+    'MUSIME - Acceso anticipado',
+    `<p>Acceso anticipado a la beta.<br/>Introduce tu codigo de invitacion.</p>
     <form id="f">
       <input id="k" type="text" placeholder="Codigo de acceso" autocomplete="off" autocapitalize="off" />
       <button type="submit">Entrar</button>
     </form>
-  </div>
-  <script>
-    document.getElementById('f').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var k = document.getElementById('k').value.trim();
-      if (!k) return;
-      var url = new URL(window.location.href);
-      url.searchParams.set('key', k);
-      window.location.href = url.toString();
-    });
-  </script>
-</body>
-</html>`
+    <script>
+      document.getElementById('f').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var k = document.getElementById('k').value.trim();
+        if (!k) return;
+        var url = new URL(window.location.href);
+        url.searchParams.set('key', k);
+        window.location.href = url.toString();
+      });
+    </script>`,
+  )
+}
+
+function expiredHtml() {
+  return pageShell(
+    'MUSIME - Beta finalizada',
+    `<p>La beta de acceso anticipado ha terminado.<br/>Gracias por probar MUSIME.<br/>Muy pronto tendremos novedades.</p>`,
+  )
 }
