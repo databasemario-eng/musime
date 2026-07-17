@@ -4,14 +4,14 @@ import { next } from '@vercel/functions'
 // El codigo real vive en la variable de entorno BETA_ACCESS_CODE (Vercel > Settings > Environment Variables),
 // nunca en el codigo fuente.
 //
-// La beta se cierra automaticamente a partir de BETA_EXPIRES_AT, incluso para quien
-// ya tenga el codigo o la cookie guardada. Para alargar o acortar la prueba, cambia
-// esta fecha.
+// La beta solo esta abierta entre BETA_STARTS_AT y BETA_EXPIRES_AT, incluso para quien
+// ya tenga el codigo o la cookie guardada. Para cambiar las fechas, edita estas dos lineas.
 
 const COOKIE_NAME = 'musime_beta'
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 15 // 15 dias
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 60 // 60 dias (cubre todo agosto de sobra)
 
-const BETA_EXPIRES_AT = new Date('2026-08-01T00:00:00Z').getTime()
+const BETA_STARTS_AT = new Date('2026-08-01T00:00:00Z').getTime()
+const BETA_EXPIRES_AT = new Date('2026-09-01T00:00:00Z').getTime() // fin del 31 de agosto
 
 export default function middleware(request) {
   const url = new URL(request.url)
@@ -23,7 +23,16 @@ export default function middleware(request) {
     return next()
   }
 
-  if (Date.now() > BETA_EXPIRES_AT) {
+  const now = Date.now()
+
+  if (now < BETA_STARTS_AT) {
+    return new Response(notStartedHtml(), {
+      status: 403,
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+    })
+  }
+
+  if (now >= BETA_EXPIRES_AT) {
     return new Response(expiredHtml(), {
       status: 403,
       headers: { 'content-type': 'text/html; charset=utf-8' },
@@ -100,6 +109,13 @@ function gateHtml() {
         window.location.href = url.toString();
       });
     </script>`,
+  )
+}
+
+function notStartedHtml() {
+  return pageShell(
+    'MUSIME - Muy pronto',
+    `<p>La beta de acceso anticipado todavia no ha empezado.<br/>Abre el 1 de agosto. ¡Vuelve entonces!</p>`,
   )
 }
 
