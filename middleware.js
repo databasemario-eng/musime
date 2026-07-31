@@ -10,7 +10,7 @@ import { next } from '@vercel/functions'
 const COOKIE_NAME = 'musime_beta'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 60 // 60 dias (cubre todo agosto de sobra)
 
-const BETA_STARTS_AT = new Date('2026-08-01T00:00:00Z').getTime()
+const BETA_STARTS_AT = new Date('2026-07-31T00:00:00Z').getTime()
 const BETA_EXPIRES_AT = new Date('2026-09-01T00:00:00Z').getTime() // fin del 31 de agosto
 
 export default function middleware(request) {
