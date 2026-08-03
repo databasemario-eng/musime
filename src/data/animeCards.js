@@ -1,4 +1,4 @@
-const BASE = 'https://eqhdtalwpcstmettwrzw.supabase.co/storage/v1/object/public/audio'
+const BASE = '/audio'
 
 const animeCards = [
   { id: 1,  anime: "Astro Boy",                      song: "Astro Boy Theme",               year: 1963, img: "/images/1.jpg",  audio: `${BASE}/1.mp3` },
