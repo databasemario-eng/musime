@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { withBase } from '../utils/withBase'
 
 export default function IntroScreen({ onComplete }) {
   const videoRef = useRef(null)
@@ -49,7 +50,7 @@ export default function IntroScreen({ onComplete }) {
     >
       <video
         ref={videoRef}
-        src="/intro.mp4"
+        src={withBase('/intro.mp4')}
         className="w-full max-w-[420px] h-auto object-contain rounded-2xl shadow-2xl"
         autoPlay
         muted

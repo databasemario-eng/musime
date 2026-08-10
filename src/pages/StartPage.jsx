@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { PACKS } from '../data/packs'
+import { withBase } from '../utils/withBase'
 
 const DLC_PACKS = Object.values(PACKS).filter(p => p.id !== 'base')
 
@@ -64,7 +65,7 @@ export default function StartPage() {
     >
       {/* Logo */}
       <motion.img
-        src="/logo-musime.png"
+        src={withBase('/logo-musime.png')}
         alt="MUSIME"
         className="w-80 md:w-[420px] mx-auto mb-2"
         animate={{

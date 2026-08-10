@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { withBase } from '../utils/withBase'
 
 export default function NotFound() {
   const navigate = useNavigate()
@@ -13,7 +14,7 @@ export default function NotFound() {
       }}
     >
       <motion.img
-        src="/logo-musime.png"
+        src={withBase('/logo-musime.png')}
         alt="MUSIME"
         className="w-40 mx-auto mb-6 opacity-40"
         animate={{ opacity: [0.3, 0.5, 0.3] }}

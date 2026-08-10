@@ -1,3 +1,5 @@
+import { withBase } from '../utils/withBase'
+
 export default function Card({ card, revealed = false, showHint = false }) {
   if (!card) return null
 
@@ -10,7 +12,7 @@ export default function Card({ card, revealed = false, showHint = false }) {
         <>
           <div className="h-44 overflow-hidden bg-gray-900">
             <img
-              src={card.img}
+              src={withBase(card.img)}
               alt={card.anime}
               className="w-full h-full object-cover"
               onError={e => { e.target.style.display = 'none' }}
@@ -24,7 +26,7 @@ export default function Card({ card, revealed = false, showHint = false }) {
         <>
           <div className="h-44 overflow-hidden bg-gray-900">
             <img
-              src={card.img}
+              src={withBase(card.img)}
               alt={card.anime}
               className="w-full h-full object-cover"
               onError={e => { e.target.style.display = 'none' }}
@@ -37,7 +39,7 @@ export default function Card({ card, revealed = false, showHint = false }) {
         </>
       ) : (
         <div className="h-56 flex flex-col items-center justify-center bg-gray-900 gap-3">
-          <img src="/logo-musime.png" alt="MUSIME" className="h-16 object-contain opacity-50" />
+          <img src={withBase('/logo-musime.png')} alt="MUSIME" className="h-16 object-contain opacity-50" />
           <p className="text-gray-600 text-xs font-['Nunito'] tracking-widest uppercase">¿Qué anime es?</p>
         </div>
       )}

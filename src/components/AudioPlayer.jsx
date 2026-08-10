@@ -1,6 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
+import { withBase } from '../utils/withBase'
 
-export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hintImg, animeName, mode }) {
+export default function AudioPlayer({ audioSrc: rawAudioSrc, onStart, timeLimit, showHint, hintImg: rawHintImg, animeName, mode }) {
+  const audioSrc = withBase(rawAudioSrc)
+  const hintImg = withBase(rawHintImg)
   const audioRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState(false)
@@ -123,7 +126,7 @@ export default function AudioPlayer({ audioSrc, onStart, timeLimit, showHint, hi
           </div>
         ) : (
           <img
-            src="/logo-musime.png"
+            src={withBase('/logo-musime.png')}
             alt="MUSIME"
             className="h-20 object-contain opacity-70"
           />
