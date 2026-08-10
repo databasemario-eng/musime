@@ -17,10 +17,10 @@ const packShonen = [
   { id: 212, anime: "Haikyuu!!",               song: "Hikari Are",             year: 2015, img: "/images/212.jpg", audio: "/audio/212.mp3" },
   { id: 213, anime: "Haikyuu!!",               song: "Fly High!!",             year: 2016, img: "/images/213.jpg", audio: "/audio/213.mp3" },
   { id: 214, anime: "Black Clover",            song: "Black Rover",            year: 2018, img: "/images/214.jpg", audio: "/audio/214.mp3" },
-  { id: 215, anime: "Black Clover",            song: "BEAUTIFUL",              year: 2019, img: "/images/215.jpg", audio: "/audio/215.mp3" },
-  { id: 216, anime: "Hunter x Hunter",         song: "Nagareboshi Kirari",     year: 2012, img: "/images/216.jpg", audio: "/audio/216.mp3" },
+  { id: 215, anime: "Black Clover",            song: "Black Catcher",          year: 2020, img: "/images/215.jpg", audio: "/audio/215.mp3" },
+  { id: 216, anime: "Hunter x Hunter",         song: "Departure!",             year: 2011, img: "/images/216.jpg", audio: "/audio/216.mp3" },
   { id: 217, anime: "One Punch Man",           song: "Seijaku no Apostle",     year: 2019, img: "/images/217.jpg", audio: "/audio/217.mp3" },
-  { id: 218, anime: "Fullmetal Alchemist Brotherhood", song: "Lion",           year: 2009, img: "/images/218.jpg", audio: "/audio/218.mp3" },
+  { id: 218, anime: "Solo Leveling",           song: "Level",                  year: 2024, img: "/images/218.jpg", audio: "/audio/218.mp3" },
   { id: 219, anime: "Fate/Zero",               song: "oath sign",              year: 2011, img: "/images/219.jpg", audio: "/audio/219.mp3" },
   { id: 220, anime: "Jujutsu Kaisen",          song: "Kaikai Kitan",           year: 2020, img: "/images/220.jpg", audio: "/audio/220.mp3" },
 ]
