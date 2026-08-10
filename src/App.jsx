@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route } from 'react-router-dom'
 import StartPage from './pages/StartPage'
 import GamePage from './pages/GamePage'
 import RankingPage from './pages/RankingPage'
@@ -8,6 +8,14 @@ import NotFound from './pages/NotFound'
 import IntroScreen from './components/IntroScreen'
 
 const INTRO_KEY = 'musime_intro_seen'
+
+// En Vercel la web vive en la raíz del dominio y BrowserRouter da URLs limpias
+// (musimethegame.com/ranking). En itch.io el juego se sirve desde una subcarpeta
+// que cambia en cada subida (/html/12345/...), así que BrowserRouter no reconoce
+// ninguna ruta. HashRouter (musimethegame.com/#/ranking) funciona sin importar
+// desde qué subcarpeta se sirva la app, así que lo usamos ahí. Se detecta con el
+// mismo BASE_URL que ya controla las rutas de los assets (ver vite.config.js).
+const Router = import.meta.env.BASE_URL === '/' ? BrowserRouter : HashRouter
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(
@@ -24,7 +32,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <Router>
       <div className="bg-black min-h-screen">
         <Routes>
           <Route path="/" element={<StartPage />} />
@@ -34,6 +42,6 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    </Router>
   )
 }
