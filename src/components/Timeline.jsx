@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
+import { withBase } from '../utils/withBase'
 
 export default function Timeline({ timeline, insertIdx, onSlotClick, activeCard }) {
   return (
@@ -53,7 +54,7 @@ function TimelineCard({ card }) {
     <div className="flex flex-col items-center rounded-xl overflow-hidden w-[78px] shrink-0 border border-gray-700 bg-gray-800 shadow-md">
       <div className="w-full h-[52px] overflow-hidden bg-gray-900">
         <img
-          src={card.img}
+          src={withBase(card.img)}
           alt={card.anime}
           className="w-full h-full object-cover"
           onError={e => { e.target.style.display = 'none' }}
